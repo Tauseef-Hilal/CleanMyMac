@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class ProcessResult:
     elapsed_time: float
@@ -9,11 +10,16 @@ class ProcessResult:
         return f"{self.elapsed_time:.2f}ms"
 
     def getFormattedSize(self):
-        return (
-            f"{round(self.size_freed / 1024, 2)}KB"
-            if self.size_freed < 10486
-            else f"{round(self.size_freed / 1048576, 2)}MB"
-        )
+        size = self.size_freed / 1024
+        suffixes = ["KB", "MB", "GB", "TB"]
+
+        for suffix in suffixes:
+            if size < 1024:
+                break
+
+            size /= 1024
+
+        return f"{size:.2f}{suffix}"
 
     @classmethod
     def zero(cls):
@@ -24,4 +30,3 @@ class ProcessResult:
             elapsed_time=self.elapsed_time + other.elapsed_time,
             size_freed=self.size_freed + other.size_freed,
         )
-
