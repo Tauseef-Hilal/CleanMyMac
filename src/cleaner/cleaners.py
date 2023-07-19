@@ -24,6 +24,15 @@ def sum_results(results: list[ProcessResult]) -> ProcessResult:
     return net_result
 
 
+def getDirectorySize(dir_path: str) -> int:
+    size = 0
+    for path, _, files in os.walk(dir_path):
+        for f in files:
+            size += os.path.getsize(f"{path}/{f}")
+
+    return size
+
+
 def clean_directory(dir_path: str) -> ProcessResult:
     start_time = time()
     size = 0
@@ -41,11 +50,11 @@ def clean_directory(dir_path: str) -> ProcessResult:
             print(Fore.LIGHTYELLOW_EX + f"--> Removing {path}", end="\t")
 
             try:
-                file_size = os.stat(path).st_size
-
                 if os.path.isdir(path):
+                    file_size = getDirectorySize(path)
                     shutil.rmtree(path)
                 else:
+                    file_size = os.path.getsize(path)
                     os.remove(path)
             except PermissionError:
                 print(Fore.LIGHTRED_EX + "[ACCESS DENIED]")
