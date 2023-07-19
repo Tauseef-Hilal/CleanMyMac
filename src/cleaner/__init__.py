@@ -1,13 +1,16 @@
 from enum import Enum
-from src.cleaner.cleaners import (
+from .cleaners import (
     clean_app_support_cache,
     clean_containers,
     clean_lib_cache,
     clean_user_logs,
     clean_xcode_cache,
+    scan_juck,
+    sum_results,
 )
 
-from src.cleaner.model import ProcessResult
+from .models import ProcessResult
+from .utils import formatted_size
 
 
 class CleanType(Enum):

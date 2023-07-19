@@ -3,7 +3,7 @@ import shutil
 from time import time
 
 from colorama import Fore
-from .model import ProcessResult
+from .models import ProcessResult, ScanResult
 from .constants import (
     APPLICATION_SUPPORT_DIR,
     APPLICATION_SUPPORT_SUFFIX,
@@ -11,9 +11,46 @@ from .constants import (
     CONTAINER_SUFFIX,
     CONTAINERS_DIR_PATH,
     IOS_DEVICE_LOGS_DIR,
+    LIB_PATH,
     USER_LOGS_DIR,
     XCODE_DERIVED_DATA_DIR,
 )
+
+
+def scan_juck() -> ScanResult:
+    cache_dir_size = get_directory_size(CACHE_DIR_PATH)
+    xcode_cache_size = get_directory_size(XCODE_DERIVED_DATA_DIR)
+    ios_device_log_size = get_directory_size(IOS_DEVICE_LOGS_DIR)
+    user_log_size = get_directory_size(USER_LOGS_DIR)
+
+    container_cache_size = 0
+    for item in os.listdir(CONTAINERS_DIR_PATH):
+        path = f"{CONTAINERS_DIR_PATH}/{item}"
+        if os.path.isfile(path):
+            continue
+
+        container_cache_size += get_directory_size(
+            f"{path}/{CONTAINER_SUFFIX}",
+        )
+
+    app_support_cache_size = 0
+    for item in os.listdir(APPLICATION_SUPPORT_DIR):
+        path = f"{APPLICATION_SUPPORT_DIR}/{item}"
+        if os.path.isfile(path):
+            continue
+
+        app_support_cache_size += get_directory_size(
+            f"{path}/{APPLICATION_SUPPORT_SUFFIX}",
+        )
+
+    return ScanResult(
+        cache_dir_size=cache_dir_size,
+        app_support_cache_size=app_support_cache_size,
+        container_cache_size=container_cache_size,
+        xcode_cache_size=xcode_cache_size,
+        ios_device_log_size=ios_device_log_size,
+        user_log_size=user_log_size,
+    )
 
 
 def sum_results(results: list[ProcessResult]) -> ProcessResult:
@@ -24,7 +61,7 @@ def sum_results(results: list[ProcessResult]) -> ProcessResult:
     return net_result
 
 
-def getDirectorySize(dir_path: str) -> int:
+def get_directory_size(dir_path: str) -> int:
     size = 0
     for path, _, files in os.walk(dir_path):
         for f in files:
@@ -51,7 +88,7 @@ def clean_directory(dir_path: str) -> ProcessResult:
 
             try:
                 if os.path.isdir(path):
-                    file_size = getDirectorySize(path)
+                    file_size = get_directory_size(path)
                     shutil.rmtree(path)
                 else:
                     file_size = os.path.getsize(path)
